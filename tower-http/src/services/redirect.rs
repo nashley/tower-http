@@ -52,7 +52,21 @@ pub struct Redirect<ResBody> {
 }
 
 impl<ResBody> Redirect<ResBody> {
+    /// Create a new [`Redirect`] that uses a [`303 See Other`][mdn] status code.
+    ///
+    /// This instructs clients to send a `GET` request to the specified URL. For example, this
+    /// can be used to send users to a confirmation page (instead of the newly created/updated
+    /// resource) after a `POST` or `PUT` has completed.
+    ///
+    /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/303
+    pub fn see_other(uri: Uri) -> Self {
+        Self::with_status_code(StatusCode::SEE_OTHER, uri)
+    }
+
     /// Create a new [`Redirect`] that uses a [`307 Temporary Redirect`][mdn] status code.
+    ///
+    /// This instructs clients to resend their request (including method and body) to the specified
+    /// URL. Clients should continue using the original URL for subsequent requests.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/307
     pub fn temporary(uri: Uri) -> Self {
@@ -61,9 +75,32 @@ impl<ResBody> Redirect<ResBody> {
 
     /// Create a new [`Redirect`] that uses a [`308 Permanent Redirect`][mdn] status code.
     ///
+    /// This instructs clients to resend their request (including method and body) to the specified
+    /// URL. Clients should instead use the specified URL for subsequent requests.
+    ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/308
     pub fn permanent(uri: Uri) -> Self {
         Self::with_status_code(StatusCode::PERMANENT_REDIRECT, uri)
+    }
+
+    /// Create a new [`Redirect`] that uses a [`301 Moved Permanently`][mdn] status code.
+    ///
+    /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/301
+    #[deprecated(
+        note = "This results in different behavior between clients, so Redirect::permanent should be used instead"
+    )]
+    pub fn moved_permanently(uri: Uri) -> Self {
+        Self::with_status_code(StatusCode::MOVED_PERMANENTLY, uri)
+    }
+
+    /// Create a new [`Redirect`] that uses a [`302 Found`][mdn] status code.
+    ///
+    /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/302
+    #[deprecated(
+        note = "This results in different behavior between clients, so Redirect::temporary or Redirect::see_other should be used instead"
+    )]
+    pub fn found(uri: Uri) -> Self {
+        Self::with_status_code(StatusCode::FOUND, uri)
     }
 
     /// Create a new [`Redirect`] that uses the given status code.
